@@ -1,0 +1,45 @@
+# Salin berkas ini ke repositori profilmu (USERNAME/USERNAME) pada jalur yang sama.
+# Perbarui aset galaxy setiap hari memakai data nyata dari akunmu.
+#
+# Hak akses minimal: hanya `contents: write` (untuk commit aset). Token yang dipakai
+# adalah GITHUB_TOKEN bawaan Actions; tidak ada secret yang perlu dibuat atau ditulis di sini.
+# Skrip hanya menghubungi api.github.com dan tidak memakai action pihak ketiga selain checkout.
+name: update-galaxy
+
+on:
+  schedule:
+    - cron: "17 3 * * *"      # 03:17 UTC setiap hari
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-galaxy
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4          # untuk keamanan lebih, kunci ke SHA commit rilis yang kamu verifikasi
+
+      - name: Render aset dengan data live
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GALAXY_USER: ${{ github.repository_owner }}
+        run: python3 scripts/render.py --live
+
+      - name: Commit bila ada perubahan
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets README.md
+          if git diff --cached --quiet; then
+            echo "Tidak ada perubahan."
+          else
+            git commit -m "chore(galaxy): perbarui aset harian"
+            git push
+          fi

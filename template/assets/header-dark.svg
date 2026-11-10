@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="292" viewBox="0 0 880 292" role="img" aria-labelledby="t d">
+  <title id="t">Header terminal: perkenalan singkat</title>
+  <desc id="d">‹Nama Kamu›, ‹peran singkat, mis. backend developer›. Fokus: ‹fokus 1› · ‹fokus 2› · ‹fokus 3›. Status: ‹status singkat, mis. sedang belajar Rust›.</desc>
+  <!-- GANTI: teks di bawah dibuat oleh scripts/buat-header.py. Ubah KONTEN di skrip itu, jangan edit manual. -->
+  <style>
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace; font-size: 16px; }
+    .t { fill: #e6edf3; }
+    .m { fill: #8b949e; }
+    .p { fill: #3fb950; font-weight: 700; }
+    .a { fill: #58a6ff; }
+    .judul { font-size: 13px; fill: #8b949e; }
+    .kursor { fill: #58a6ff; }
+    @media (prefers-reduced-motion: no-preference) {
+      .kursor { animation: kedip 1.2s steps(1) infinite; }
+      @keyframes kedip { 50% { opacity: 0; } }
+    }
+  </style>
+  <rect width="880" height="292" rx="12" fill="#0d1117"/>
+  <rect x="8.5" y="8.5" width="863" height="275" rx="10" fill="#161b22" stroke="#30363d"/>
+  <path d="M9 44V19a10 10 0 0 1 10-10h842a10 10 0 0 1 10 10v25z" fill="#1c2128"/>
+  <line x1="9" y1="44.5" x2="871" y2="44.5" stroke="#30363d"/>
+  <circle cx="34" cy="27" r="6" fill="#ff5f57"/>
+  <circle cx="56" cy="27" r="6" fill="#febc2e"/>
+  <circle cx="78" cy="27" r="6" fill="#28c840"/>
+  <text x="440" y="32" text-anchor="middle" class="judul">‹nama-kamu› — zsh</text>
+  <text x="36" y="92" xml:space="preserve"><tspan class="p">‹nama-kamu›@dev</tspan><tspan class="m">:~$ </tspan><tspan class="t">whoami</tspan></text>
+  <text x="36" y="122" xml:space="preserve"><tspan class="a" font-weight="700">‹Nama Kamu›</tspan><tspan class="m"> — </tspan><tspan class="t">‹peran singkat, mis. backend developer›</tspan></text>
+  <text x="36" y="158" xml:space="preserve"><tspan class="p">‹nama-kamu›@dev</tspan><tspan class="m">:~$ </tspan><tspan class="t">cat fokus.txt</tspan></text>
+  <text x="36" y="188" xml:space="preserve" class="t">‹fokus 1› · ‹fokus 2› · ‹fokus 3›</text>
+  <text x="36" y="224" xml:space="preserve"><tspan class="p">‹nama-kamu›@dev</tspan><tspan class="m">:~$ </tspan><tspan class="t">echo $STATUS</tspan></text>
+  <text x="36" y="254" xml:space="preserve" class="t">‹status singkat, mis. sedang belajar Rust›</text>
+  <text x="36" y="290" xml:space="preserve"><tspan class="p">‹nama-kamu›@dev</tspan><tspan class="m">:~$ </tspan><tspan class="kursor">▌</tspan></text>
+</svg>

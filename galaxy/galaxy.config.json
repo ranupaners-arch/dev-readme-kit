@@ -1,0 +1,38 @@
+{
+  "_catatan": "Semua nilai di bawah adalah DATA CONTOH (YOUR NAME, YOUR-USERNAME, example.com). Ganti semuanya sebelum memakai mode live; render.py --live menolak config yang masih berisi data contoh.",
+  "username": "YOUR-USERNAME",
+  "identity": {
+    "name": "YOUR NAME",
+    "role": "Web & app developer.",
+    "tagline": "I build useful things for the web."
+  },
+  "projects": [
+    {
+      "title": "Project Alpha",
+      "label": "Project One",
+      "repo": "YOUR-USERNAME/project-alpha",
+      "description": "A clean UI component library."
+    },
+    {
+      "title": "Project Beta",
+      "label": "Project Two",
+      "repo": "YOUR-USERNAME/project-beta",
+      "description": "A backend API framework."
+    },
+    {
+      "title": "Project Gamma",
+      "label": "Project Three",
+      "repo": "YOUR-USERNAME/project-gamma",
+      "description": "A command-line toolkit for developers."
+    }
+  ],
+  "beyond": ["Reading", "Music", "Exploring"],
+  "connect": [
+    { "label": "Portfolio", "url": "https://example.com" },
+    { "label": "Email", "url": "mailto:you@example.com" },
+    { "label": "Social", "url": "https://example.com/social" }
+  ],
+  "appearance": "auto",
+  "tree": { "style": "sakura" },
+  "data": { "mode": "demo", "demo_end_date": "2026-10-31" }
+}
