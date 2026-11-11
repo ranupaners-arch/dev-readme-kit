@@ -180,6 +180,28 @@ npm i --no-save marked@12 github-markdown-css@5        # di folder sementara
 PREVIEW_DEPS=/folder/sementara node scripts/buat-preview.mjs
 ```
 
+### Preview animasi untuk README repo kit
+
+`docs/previews/galaxy-animated-{dark,light}.svg` menggabungkan hero, konstelasi, dan pohon dalam satu gambar dengan data demo. Dibuat dengan:
+
+```sh
+python3 galaxy/scripts/render.py --preview-svg docs/previews
+python3 scripts/cek-animasi.py        # verifikasi statis, kode keluar 0 bila lolos
+```
+
+Gerakan (semuanya CSS di dalam SVG, tanpa JavaScript dan tanpa SMIL):
+
+| Efek | Cara kerja |
+| :-- | :-- |
+| Kelip bintang | ±26% bintang hero dan bintang konstelasi tingkat 3–4 memakai `tw` (opasitas 0,2 ↔ 1, periode 3,3–7,2 s) dengan jeda acak per bintang |
+| Orbit | tiga cincin tipis di bidang galaksi yang sudah dimiringkan, satu titik per cincin, periode 18 s, 29 s (berlawanan arah), dan 44 s |
+| Piringan menggoyang | seluruh bintang piringan berputar ±3,5° bolak-balik dalam 28 s, simpangan terjauh ±14 unit |
+| Denyut | halo penanda proyek dan lentera amber berdenyut pelan (4,6 s) |
+
+Penanda proyek dan kotak labelnya sengaja diam supaya tetap terbaca, sehingga piringan hanya bergoyang pelan, bukan berputar penuh. Semua animasi berada di dalam `@media (prefers-reduced-motion: no-preference)`; pengguna yang meminta gerak minimal melihat gambar diam yang sama dengan aset statis. Posisi bintang piringan identik dengan `hero-*.svg` yang sudah disetujui (diperiksa oleh `cek-animasi.py`), dan aset statis di `galaxy/assets/` tidak diubah.
+
+`cek-animasi.py` memeriksa: XML valid, tanpa skrip, SMIL, atau URL eksternal; animasi hanya di dalam blok *reduced-motion*; setiap `@keyframes` dan kelas terdefinisi; id unik dan rujukan terpenuhi; tata letak bintang sama dengan aset statis; serta simpangan gerak terburuk tetap di dalam kanvas. Pemeriksaan ini tidak menggantikan melihat animasinya langsung di browser.
+
 Preview HTML dibangun tanpa browser dan tidak menggantikan pengecekan di GitHub sungguhan. Tangkapan layarnya (`docs/previews/preview-galaxy-light.png` dan `docs/previews/preview-galaxy-dark.png`) diambil dari kedua HTML ini dan disertakan di README akar.
 
 ## Batasan yang belum diverifikasi

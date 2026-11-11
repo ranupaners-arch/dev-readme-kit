@@ -16,6 +16,13 @@ Tema (config `appearance`, atau flag --theme)
     dark     hanya tema dark; README memakai gambar tunggal
     light    hanya tema light; README memakai gambar tunggal
 
+Preview animasi untuk README repo kit (hanya data demo)
+    python3 scripts/render.py --preview-svg ../docs/previews
+    -> galaxy-animated-{dark,light}.svg: hero + konstelasi + pohon dalam satu gambar, dengan kelip
+       bintang dan gerakan orbit halus. Hanya CSS (tanpa JavaScript); semua animasi berada di dalam
+       @media (prefers-reduced-motion: no-preference), jadi pengguna yang meminta gerak minimal
+       melihat gambar diam.
+
 Pemakaian
     python3 scripts/render.py --demo
     GITHUB_TOKEN=... python3 scripts/render.py --live
@@ -343,6 +350,42 @@ STYLE = (
     "@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}}"
 )
 
+# Mode animasi (hanya dipakai --preview-svg). rng terpisah agar tata letak bintang tidak berubah
+# dibanding aset statis yang sudah disetujui.
+ANIM = {"on": False, "rng": None}
+
+STYLE_ANIM = (
+    f"text{{font-family:{SANS}}}.serif{{font-family:{SERIF};font-style:italic}}"
+    "@media (prefers-reduced-motion:no-preference){"
+    ".tw{animation:tw 4s ease-in-out infinite}.tw2{animation-duration:5.5s}.tw3{animation-duration:3.3s}.tw4{animation-duration:7.2s}"
+    "@keyframes tw{0%,100%{opacity:.2}50%{opacity:1}}"
+    ".sway{animation:sway 28s ease-in-out infinite}"
+    "@keyframes sway{0%,100%{transform:rotate(-3.5deg)}50%{transform:rotate(3.5deg)}}"
+    ".o1{animation:spin 18s linear infinite}.o2{animation:spin 29s linear infinite reverse}.o3{animation:spin 44s linear infinite}"
+    "@keyframes spin{to{transform:rotate(360deg)}}"
+    ".pulse{animation:pulse 4.6s ease-in-out infinite}"
+    "@keyframes pulse{0%,100%{fill-opacity:.10}50%{fill-opacity:.38}}}"
+)
+
+
+def twinkle_attrs(base: str) -> str:
+    """Kelas kelip + jeda acak (mode animasi) supaya bintang tidak berkedip serempak."""
+    if not ANIM["on"]:
+        return f' class="{base}"'
+    return f' class="{base}" style="animation-delay:-{ANIM["rng"].uniform(0, 7):.1f}s"'
+
+
+def extra_twinkle(prob: float) -> str:
+    """Kelip tambahan untuk bintang yang pada aset statis diam (hanya mode animasi)."""
+    if not ANIM["on"] or ANIM["rng"].random() >= prob:
+        return ""
+    return twinkle_attrs(("tw", "tw tw2", "tw tw3", "tw tw4")[int(ANIM["rng"].random() * 4)])
+
+
+def pulse_cls() -> str:
+    return ' class="pulse"' if ANIM["on"] else ""
+
+
 BADGE_RECT = lambda w: (w - 132, 12, w - 14, 40)   # area lencana DEMO (x0, y0, x1, y1), untuk hindari tabrakan
 
 
@@ -361,14 +404,16 @@ def svg_doc(w, h, title, desc, body, demo, defs="") -> str:
         f'<title id="t">{xesc(title)}</title>\n<desc id="d">{xesc(desc)}</desc>\n'
         f'<defs><linearGradient id="bg" x1="0" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="{C["bg2"]}"/>'
         f'<stop offset=".55" stop-color="{C["bg1"]}"/><stop offset="1" stop-color="{C["bg0"]}"/></linearGradient>{defs}</defs>\n'
-        f'<style>{STYLE}</style>\n<rect x="{off}" y="{off}" width="{w - 2 * off:g}" height="{h - 2 * off:g}" rx="14" fill="url(#bg)"{edge}/>\n{body}\n{badge}\n</svg>\n'
+        f'<style>{STYLE_ANIM if ANIM["on"] else STYLE}</style>\n<rect x="{off}" y="{off}" width="{w - 2 * off:g}" height="{h - 2 * off:g}" rx="14" fill="url(#bg)"{edge}/>\n{body}\n{badge}\n</svg>\n'
     )
 
 
 def star(x, y, r, col, op, rng, twinkle=True) -> str:
     cls = ""
     if twinkle and rng.random() < 0.10:
-        cls = ' class="tw"' if rng.random() < 0.4 else (' class="tw tw2"' if rng.random() < 0.5 else ' class="tw tw3"')
+        cls = twinkle_attrs("tw" if rng.random() < 0.4 else ("tw tw2" if rng.random() < 0.5 else "tw tw3"))
+    elif twinkle:
+        cls = extra_twinkle(0.16)
     op = clamp(op * C["star_k"] + C["star_b"], 0, 1)
     out = ""
     if r > 1.6:
@@ -377,6 +422,21 @@ def star(x, y, r, col, op, rng, twinkle=True) -> str:
 
 
 # --------------------------------------------------------------------------- hero
+def orbit_layer() -> str:
+    """Tiga cincin orbit tipis dengan satu titik tiap cincin (hanya mode animasi).
+
+    Digambar di bidang galaksi (di dalam grup yang sudah dimiringkan), jadi gerakannya mengikuti
+    kemiringan piringan. Titik diberi skala balik agar tetap bulat.
+    """
+    out = []
+    for radius, cls, col, r in ((78, "o1", C["amber2"], 3.4), (128, "o2", C["star"], 2.8), (176, "o3", C["cyan"], 2.4)):
+        out.append(f'<circle r="{radius}" fill="none" stroke="{col}" stroke-opacity=".18" stroke-width="1" '
+                   f'stroke-dasharray="2 7" vector-effect="non-scaling-stroke"/>')
+        out.append(f'<g class="{cls}"><g transform="translate({radius} 0) scale(1 1.5625)">'
+                   f'<circle r="{num(r * 3)}" fill="{col}" fill-opacity=".18"/><circle r="{r}" fill="{col}"/></g></g>')
+    return "".join(out)
+
+
 def render_hero(cfg: dict, data: Data):
     W, H = 1000, 420
     rng = Rng("hero:" + cfg["username"])
@@ -394,6 +454,8 @@ def render_hero(cfg: dict, data: Data):
         if x < 520 and rng.random() < 0.7:
             continue
         out.append(star(x, y, r, C["star"], o, rng))
+    plane = []
+    tgt = plane if ANIM["on"] else out
     arms = [(0.0, 1.0, 340), (math.pi, 1.0, 340), (math.pi / 2, 0.55, 110), (3 * math.pi / 2, 0.55, 110)]
     for th0, strength, count in arms:
         for _ in range(count):
@@ -403,7 +465,7 @@ def render_hero(cfg: dict, data: Data):
             off = rng.bell() * (5 + 26 * t) * 1.6 * math.sqrt(strength)
             px = r * math.cos(th) + off * math.cos(th + math.pi / 2)
             py = r * math.sin(th) + off * math.sin(th + math.pi / 2)
-            sx, sy = proj(px, py)
+            sx, sy = (px, py) if ANIM["on"] else proj(px, py)   # animasi: koordinat bidang galaksi
             u = rng.random()
             if u < 0.10:
                 col = C["amber2"] if t < 0.5 else C["amber"]
@@ -415,13 +477,15 @@ def render_hero(cfg: dict, data: Data):
                 col = mix(C["star"], C["cyan"], 0.35 + 0.65 * t)
             rad = 0.5 + rng.random() ** 3 * (1.9 - 0.8 * t)
             op = 0.45 + 0.55 * rng.random() * (1 - 0.4 * t)
-            out.append(star(sx, sy, rad, col, op, rng))
+            tgt.append(star(sx, sy, rad, col, op, rng))
     for _ in range(260):
         r = a * 0.2 * rng.random() ** 1.6
         ang = rng.uniform(0, 2 * math.pi)
-        sx, sy = proj(r * math.cos(ang), r * math.sin(ang))
+        sx, sy = (r * math.cos(ang), r * math.sin(ang)) if ANIM["on"] else proj(r * math.cos(ang), r * math.sin(ang))
         col = (C["amber2"], C["star"], C["amber"])[int(rng.random() * 3)]
-        out.append(star(sx, sy, rng.uniform(0.5, 1.6), col, rng.uniform(0.55, 1.0), rng, False))
+        tgt.append(star(sx, sy, rng.uniform(0.5, 1.6), col, rng.uniform(0.55, 1.0), rng, False))
+    if ANIM["on"]:   # piringan menggoyang pelan; cincin orbit berputar penuh
+        out.append(f'<g transform="translate({cx} {cy}) rotate(-20) scale(1 {squash})"><g class="sway">{"".join(plane)}</g>{orbit_layer()}</g>')
     out.append(f'<ellipse cx="{cx}" cy="{cy}" rx="64" ry="{64 * squash:.0f}" transform="rotate(-20 {cx} {cy})" fill="url(#core)"/>')
     out.append(f'<circle cx="{cx}" cy="{cy}" r="4.5" fill="{C["core"]}" stroke="{C["amber"]}" stroke-width="1.2" stroke-opacity="{C["core_ring"]}"/>')
 
@@ -486,7 +550,7 @@ def render_hero(cfg: dict, data: Data):
         nx, ny = clamp(sx, x0, x1), clamp(sy, y0, y1)
         mr = 3.6 + clamp(math.log10(1 + st), 0, 2.5) * 0.9
         out.append(f'<line x1="{num(sx)}" y1="{num(sy)}" x2="{num(nx)}" y2="{num(ny)}" stroke="{C["amber"]}" stroke-opacity=".75" stroke-width="1.2"/>')
-        out.append(f'<circle cx="{num(sx)}" cy="{num(sy)}" r="{num(mr * 3)}" fill="{C["amber"]}" fill-opacity=".18"/>')
+        out.append(f'<circle cx="{num(sx)}" cy="{num(sy)}" r="{num(mr * 3)}" fill="{C["amber"]}" fill-opacity=".18"{pulse_cls()}/>')
         out.append(f'<circle cx="{num(sx)}" cy="{num(sy)}" r="{num(mr)}" fill="{C["amber2"]}" stroke="{C["amber"]}" stroke-width="1" stroke-opacity="{C["core_ring"]}"/>')
         out.append(f'<rect x="{num(x0)}" y="{num(y0)}" width="{num(x1 - x0)}" height="{num(y1 - y0)}" rx="17" fill="{C["pill"]}" '
                    f'fill-opacity="{C["pill_op"]}" stroke="{C["cyan"]}" stroke-opacity=".7"/>')
@@ -545,7 +609,9 @@ def render_constellation(cfg: dict, data: Data):
             out.append(f'<circle cx="{num(x)}" cy="{num(y)}" r="{num(r * 3.2)}" fill="{col[lv]}" fill-opacity="{C["halo"] + 0.02:.2f}"/>')
         tw = ""
         if lv >= 2 and rng.random() < 0.12:
-            tw = ' class="tw"' if rng.random() < 0.5 else ' class="tw tw3"'
+            tw = twinkle_attrs("tw" if rng.random() < 0.5 else "tw tw3")
+        elif lv >= 3:
+            tw = extra_twinkle(0.35)
         if lv == 4:    # bintang empat sudut
             s, k = r * 2.1, r * 0.55
             out.append(f'<path d="M{num(x)},{num(y - s)}L{num(x + k)},{num(y - k)}L{num(x + s)},{num(y)}L{num(x + k)},{num(y + k)}'
@@ -695,7 +761,7 @@ def _sakura(m, maxm, g, Ht, n_amber, rng, cx, gy):
         tx_, ty_ = tips[int(rng.random() * len(tips))]
         ln = rng.uniform(14, 26)
         out.append(f'<line x1="{num(tx_)}" y1="{num(ty_)}" x2="{num(tx_)}" y2="{num(ty_ + ln)}" stroke="{C["amber"]}" stroke-opacity=".7"/>')
-        out.append(f'<circle cx="{num(tx_)}" cy="{num(ty_ + ln + 3)}" r="9" fill="{C["amber"]}" fill-opacity=".22"/>')
+        out.append(f'<circle cx="{num(tx_)}" cy="{num(ty_ + ln + 3)}" r="9" fill="{C["amber"]}" fill-opacity=".22"{pulse_cls()}/>')
         out.append(f'<circle cx="{num(tx_)}" cy="{num(ty_ + ln + 3)}" r="3.6" fill="{C["amber2"]}" stroke="{C["amber"]}" stroke-opacity="{C["core_ring"]}"/>')
     desc = (f"Pohon sakura: batang setinggi {int(Ht)} unit, 12 cabang (satu per irisan bulan), "
             f"{len(flowers)} bunga, {n_amber} lentera amber.")
@@ -731,7 +797,7 @@ def _pine(m, maxm, g, Ht, n_amber, stars_total, rng, cx, gy):
         apex, base_y, w = tier_geo[int(rng.random() * tiers)]
         f = rng.uniform(0.5, 0.92)
         px, py = cx + (rng.random() * 2 - 1) * w * f * 0.85, apex[1] + f * (base_y - apex[1])
-        out.append(f'<circle cx="{num(px)}" cy="{num(py)}" r="9" fill="{C["amber"]}" fill-opacity=".22"/><circle cx="{num(px)}" cy="{num(py)}" r="3.6" fill="{C["amber2"]}" stroke="{C["amber"]}" stroke-opacity="{C["core_ring"]}"/>')
+        out.append(f'<circle cx="{num(px)}" cy="{num(py)}" r="9" fill="{C["amber"]}" fill-opacity=".22"{pulse_cls()}/><circle cx="{num(px)}" cy="{num(py)}" r="3.6" fill="{C["amber2"]}" stroke="{C["amber"]}" stroke-opacity="{C["core_ring"]}"/>')
     top = tier_geo[-1][0]
     sz = 10 + 8 * clamp(math.log10(1 + stars_total) / 4, 0, 1)
     pts = []
@@ -745,6 +811,45 @@ def _pine(m, maxm, g, Ht, n_amber, stars_total, rng, cx, gy):
     lights = sum(min(22, x[1]) for x in m)
     desc = f"Pohon pine: 12 tingkat (satu per irisan bulan), {lights} lampu aktivitas, {n_amber} ornamen amber, bintang puncak."
     return out, desc
+
+
+# --------------------------------------------------------------------------- preview animasi
+_IDS = ("bg", "neb", "core", "moon", "hill", "crown", "bark", "fl")
+
+
+def _namespace(frag: str, pre: str) -> str:
+    """Beri awalan unik pada id agar tiga kartu bisa berbagi satu dokumen SVG."""
+    for n in _IDS:
+        frag = frag.replace(f'id="{n}"', f'id="{pre}{n}"').replace(f"url(#{n})", f"url(#{pre}{n})").replace(f'href="#{n}"', f'href="#{pre}{n}"')
+    return frag
+
+
+def build_animated_preview(cfg: dict, data: Data, theme: str) -> str:
+    """Hero + konstelasi + pohon dalam satu SVG beranimasi untuk README repo kit."""
+    use_theme(theme)
+    ANIM["on"], ANIM["rng"] = True, Rng("anim:" + cfg["username"])
+    try:
+        cards = [("h-", render_hero(cfg, data)[0], 1000, 420),
+                 ("c-", render_constellation(cfg, data)[0], 1000, 330),
+                 ("t-", render_tree(cfg, data, cfg["tree_style"])[0], 1000, 560)]
+        edge_style = STYLE_ANIM
+    finally:
+        ANIM["on"], ANIM["rng"] = False, None
+    gap = 28
+    H = sum(c[3] for c in cards) + gap * (len(cards) - 1)
+    defs, bodies, y = [], [], 0
+    for pre, svg, w, h in cards:
+        d = re.search(r"<defs>(.*?)</defs>", svg, re.S).group(1)
+        body = svg.split("</style>\n", 1)[1].rsplit("</svg>", 1)[0]
+        defs.append(_namespace(d, pre))
+        bodies.append(f'<g transform="translate(0 {y})">{_namespace(body, pre)}</g>')
+        y += h + gap
+    title = "Preview varian galaxy dev-readme-kit (animasi, data demo)"
+    desc = ("Hero dengan spiral galaksi dan label proyek, konstelasi kontribusi 12 bulan, dan pohon pertumbuhan. "
+            "Bintang berkelip dan cincin orbit berputar pelan. Semua data adalah demo.")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="{H}" '
+            f'viewBox="0 0 1000 {H}" role="img" aria-labelledby="t d">\n<title id="t">{xesc(title)}</title>\n<desc id="d">{xesc(desc)}</desc>\n'
+            f'<defs>{"".join(defs)}</defs>\n<style>{edge_style}</style>\n' + "\n".join(bodies) + "\n</svg>\n")
 
 
 # --------------------------------------------------------------------------- markdown
@@ -821,6 +926,7 @@ def main() -> int:
     g.add_argument("--demo", action="store_true", help="paksa data demo (tanpa jaringan)")
     g.add_argument("--live", action="store_true", help="paksa data nyata (butuh GITHUB_TOKEN)")
     ap.add_argument("--all-trees", action="store_true", help="tulis juga tree-sakura-*.svg dan tree-pine-*.svg")
+    ap.add_argument("--preview-svg", metavar="FOLDER", help="tulis galaxy-animated-{dark,light}.svg (data demo) ke FOLDER, lalu keluar")
     ap.add_argument("--check", action="store_true", help="validasi config dan cek sisa data contoh, lalu keluar")
     args = ap.parse_args()
 
@@ -833,6 +939,14 @@ def main() -> int:
     mode = "live" if args.live else "demo" if args.demo else cfg["mode"]
     appearance = args.theme or cfg["appearance"]
     themes = ("dark", "light") if appearance == "auto" else (appearance,)
+
+    if args.preview_svg:
+        out = Path(args.preview_svg)
+        data = demo_data(cfg)
+        changed = [f"galaxy-animated-{th}.svg" for th in ("dark", "light")
+                   if write_if_changed(out / f"galaxy-animated-{th}.svg", build_animated_preview(cfg, data, th))]
+        print("preview animasi (demo) · berubah:", ", ".join(changed) if changed else "tidak ada")
+        return 0
 
     left = check_live_ready(cfg)
     if args.check:

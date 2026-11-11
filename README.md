@@ -9,11 +9,23 @@ Kumpulan template README profil GitHub dengan data contoh yang jelas ditandai. T
 
 ## Preview varian galaxy
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/previews/galaxy-animated-dark.svg">
+  <img src="docs/previews/galaxy-animated-light.svg" alt="Preview animasi varian galaxy: hero dengan spiral galaksi dan label proyek, konstelasi kontribusi 12 bulan, dan pohon pertumbuhan. Bintang berkelip dan cincin orbit berputar pelan. Semua data adalah demo.">
+</picture>
+
+Gambar di atas berganti otomatis mengikuti tema GitHub-mu (terang atau gelap). Bintang berkelip dan cincin orbit berputar pelan; animasinya murni CSS di dalam SVG, tanpa JavaScript, dan berhenti bila sistemmu meminta gerak minimal (*reduce motion*). Semua angka, nama, dan proyek adalah **data demo**, ditandai lencana *DEMO DATA*. Animasi dibuat dari renderer yang sama dengan aset varian galaxy (`render.py --preview-svg`) dan diperiksa dengan `scripts/cek-animasi.py`. Aset itu hanya dilihat lewat pemeriksaan statis; cara GitHub menampilkan animasinya belum dikonfirmasi.
+
+<details>
+<summary>Tangkapan layar statis (terang dan gelap)</summary>
+
 | Terang | Gelap |
 | :-: | :-: |
 | [![Preview galaxy, tema terang](docs/previews/preview-galaxy-light.png)](docs/previews/preview-galaxy-light.png) | [![Preview galaxy, tema gelap](docs/previews/preview-galaxy-dark.png)](docs/previews/preview-galaxy-dark.png) |
 
-Klik gambar untuk ukuran penuh. Semua angka, nama, dan proyek di gambar adalah **data demo**, ditandai lencana *DEMO DATA*. Bagian "Hanya di preview" di dasar gambar menampilkan dua opsi pohon (sakura dan pine); README asli hanya memuat satu sesuai `tree.style`.
+Klik gambar untuk ukuran penuh. Bagian "Hanya di preview" di dasar gambar menampilkan dua opsi pohon (sakura dan pine); README asli hanya memuat satu sesuai `tree.style`.
+
+</details>
 
 > Semua isi kedua varian adalah **data contoh**. Varian dasar menandainya dengan `‹seperti ini›`; varian galaxy memakai `YOUR NAME`, `YOUR-USERNAME`, `example.com` dan lencana **DEMO DATA** pada gambar.
 
@@ -31,11 +43,13 @@ galaxy/                        # varian galaxy
 │                              #   hero, constellation, tree (+ tree-sakura/tree-pine)
 └── .github/workflows/update-galaxy.yml
 docs/galaxy.md                 # panduan varian galaxy: pemasangan, pemetaan data, izin
+docs/previews/                 # galaxy-animated-{dark,light}.svg (utama) + PNG statis
 scripts/
 ├── buat-header.py             # membuat ulang SVG header varian dasar
 ├── cek-placeholder.sh         # memeriksa sisa data contoh (varian dasar)
+├── cek-animasi.py             # verifikasi statis SVG animasi (CSS, reduced-motion, desain tak berubah)
 └── buat-preview.mjs           # membangun preview HTML terang/gelap
-preview/                       # preview-{light,dark}.html (dasar), preview-galaxy-{light,dark}.html
+preview/                       # preview-{light,dark}.html (dasar), preview-galaxy-*.html, preview-animated-*.html
 ```
 
 ## Preview HTML

@@ -62,3 +62,23 @@ body{margin:0;background:${page};color:${fg}}
     console.log('tulis preview/' + v.out(theme));
   }
 }
+
+// Halaman preview animasi: SVG animasi (docs/previews) di halaman bergaya GitHub, terang dan gelap.
+for (const [theme, page, fg, line] of THEMES) {
+  const html = `<!doctype html><html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preview animasi — ${theme}</title>
+<style>/* github-markdown-css, MIT, (c) Sindre Sorhus */
+${css(theme)}
+body{margin:0;background:${page};color:${fg}}
+.wrap{max-width:896px;margin:0 auto;padding:32px 16px}
+.markdown-body{box-sizing:border-box;padding:32px;border:1px solid ${line};border-radius:6px;background:${page}}
+.markdown-body img{max-width:100%;height:auto}
+</style></head><body><div class="wrap"><article class="markdown-body">
+<h2>Preview varian galaxy (animasi, data demo)</h2>
+<p><img src="../docs/previews/galaxy-animated-${theme}.svg" alt="Preview animasi varian galaxy"></p>
+<p>Gambar dimuat lewat <code>&lt;img&gt;</code>, sama seperti di README GitHub. Animasi hanya CSS dan berhenti bila sistem meminta gerak minimal.</p>
+</article></div></body></html>`;
+  writeFileSync(resolve(root, 'preview', `preview-animated-${theme}.html`), html);
+  console.log('tulis preview/preview-animated-' + theme + '.html');
+}
