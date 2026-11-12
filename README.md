@@ -7,6 +7,19 @@ Kumpulan template README profil GitHub dengan data contoh yang jelas ditandai. T
 | **Dasar** (`template/`) | header terminal, `whoami`, proyek dengan cerita pendek, minat, kontak; terang/gelap otomatis | ditulis manual | bagian di bawah |
 | **Galaxy** (`galaxy/`) | hero dengan spiral galaksi, konstelasi kontribusi, pohon pertumbuhan; varian dark dan light asli (`<picture>`) | config + data GitHub harian (Actions) | [docs/galaxy.md](docs/galaxy.md) |
 
+## Preview varian dasar
+
+<details>
+<summary>Tangkapan layar statis (terang dan gelap)</summary>
+
+| Terang | Gelap |
+| :-: | :-: |
+| [![Preview varian dasar, tema terang](docs/previews/preview-dasar-light.png)](docs/previews/preview-dasar-light.png) | [![Preview varian dasar, tema gelap](docs/previews/preview-dasar-dark.png)](docs/previews/preview-dasar-dark.png) |
+
+Klik gambar untuk ukuran penuh. Diambil dari `preview/preview-light.html` dan `preview/preview-dark.html` dengan Chrome headless (lebar 1100 px). Semua teks `‹...›` adalah data contoh yang memang harus kamu ganti.
+
+</details>
+
 ## Preview varian galaxy
 
 <picture>
@@ -14,7 +27,7 @@ Kumpulan template README profil GitHub dengan data contoh yang jelas ditandai. T
   <img src="docs/previews/galaxy-animated-light.svg" alt="Preview animasi varian galaxy: hero dengan spiral galaksi dan label proyek, konstelasi kontribusi 12 bulan, dan pohon pertumbuhan. Bintang berkelip dan cincin orbit berputar pelan. Semua data adalah demo.">
 </picture>
 
-Gambar di atas berganti otomatis mengikuti tema GitHub-mu (terang atau gelap). Bintang berkelip dan cincin orbit berputar pelan; animasinya murni CSS di dalam SVG, tanpa JavaScript, dan berhenti bila sistemmu meminta gerak minimal (*reduce motion*). Semua angka, nama, dan proyek adalah **data demo**, ditandai lencana *DEMO DATA*. Animasi dibuat dari renderer yang sama dengan aset varian galaxy (`render.py --preview-svg`) dan diperiksa dengan `scripts/cek-animasi.py`. Aset itu hanya dilihat lewat pemeriksaan statis; cara GitHub menampilkan animasinya belum dikonfirmasi.
+Gambar di atas berganti otomatis mengikuti tema GitHub-mu (terang atau gelap). Bintang berkelip dan cincin orbit berputar pelan; animasinya murni CSS di dalam SVG, tanpa JavaScript, dan berhenti bila sistemmu meminta gerak minimal (*reduce motion*). Semua angka, nama, dan proyek adalah **data demo**, ditandai lencana *DEMO DATA*. Animasi dibuat dari renderer yang sama dengan aset varian galaxy (`render.py --preview-svg`) dan diperiksa dengan `scripts/cek-animasi.py`. Yang sudah dicek pada 2026-11-13: file mentah disajikan GitHub sebagai `image/svg+xml`, halaman repo menampilkannya lewat `<picture>` (GitHub membungkusnya dengan `<themed-picture>`) dengan sumber terang/gelap yang berganti sesuai tema, gambar termuat di Chrome headless, dan file memuat `@keyframes` CSS tanpa SMIL. Yang belum dikonfirmasi: apakah animasinya benar-benar terlihat bergerak di halaman GitHub (termasuk aplikasi ponsel) dan apakah *reduce motion* bekerja di sana; pemeriksaan di atas tidak melihat gerakannya langsung di halaman GitHub.
 
 <details>
 <summary>Tangkapan layar statis (terang dan gelap)</summary>
@@ -43,7 +56,7 @@ galaxy/                        # varian galaxy
 │                              #   hero, constellation, tree (+ tree-sakura/tree-pine)
 └── .github/workflows/update-galaxy.yml
 docs/galaxy.md                 # panduan varian galaxy: pemasangan, pemetaan data, izin
-docs/previews/                 # galaxy-animated-{dark,light}.svg (utama) + PNG statis
+docs/previews/                 # galaxy-animated-{dark,light}.svg (utama) + PNG statis (galaxy dan dasar)
 scripts/
 ├── buat-header.py             # membuat ulang SVG header varian dasar
 ├── cek-placeholder.sh         # memeriksa sisa data contoh (varian dasar)
@@ -60,8 +73,9 @@ Selain PNG di atas, repo ini membawa preview HTML. Unduh atau clone repo, lalu b
 | :-- | :-- | :-- |
 | Dasar | `preview/preview-light.html` | `preview/preview-dark.html` |
 | Galaxy | `preview/preview-galaxy-light.html` | `preview/preview-galaxy-dark.html` |
+| Galaxy animasi | `preview/preview-animated-light.html` | `preview/preview-animated-dark.html` |
 
-Preview memakai CSS gaya GitHub, jadi mendekati tetapi tidak identik dengan render GitHub sungguhan. PNG di atas adalah tangkapan layar dari preview HTML galaxy, bukan dari halaman profil GitHub yang sebenarnya.
+Preview memakai CSS gaya GitHub, jadi mendekati tetapi tidak identik dengan render GitHub sungguhan. PNG di atas adalah tangkapan layar dari preview HTML masing-masing varian (dasar dan galaxy), bukan tangkapan halaman profil GitHub yang sebenarnya.
 
 ## Pemasangan varian dasar
 
